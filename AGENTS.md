@@ -1,27 +1,50 @@
-# Atlas Core agent guide
+# Working on Atlas
 
-Use the installed PStack `poteto-mode` workflow. Read a supporting skill before invoking it, and use only runtime capabilities and reviewers actually available. Do not invent a model, tool, independent review or passing check.
+Read the [overview](README.md), the owning layer, and
+[delivery](Atlas%20Core/delivery.md) before changing behavior.
 
-## Starting state and first task
+## Documentation first
 
-The initial repository contains documentation only. Nothing is implemented or tested here. No referenced source path, command, fixture or historical success constitutes an available implementation. Read [documentation context](docs/documentation-context.md) before interpreting the imported system prose.
+State the observable outcome and failure behavior before implementing it. Keep
+one authoritative definition: Protocol for shared contracts, Core for server
+mechanisms, SDK for client behavior. Update that definition rather than adding
+another summary that can disagree with it.
 
-The initial task is a specification audit and a proposed build plan, not implementation. Follow the first prompt in [PSTACK_START.md](PSTACK_START.md). Do not copy, inspect or use the previous implementation, PR diffs, generated output or tests to supply a solution. External primary technical sources may establish technical facts. Historical links are provenance, not an instruction to fetch old code.
+Keep pages short, with a clear opening and small sections. Explain a rule once.
+Prefer a concrete example to a taxonomy. Put investigation transcripts, temporary
+plans, and review chatter in the PR or local scratch space, not permanent docs.
+Aim for fewer than 100 lines per page without hiding a long essay on one line.
 
-## Read before deciding
+The user owns product behavior and scope. Agents can choose engineering details
+within those boundaries. Separate defects from suggestions; do not let a review
+bot create new requirements. Do not merge without the user's approval.
 
-Read [GLOSSARY.md](GLOSSARY.md), [documentation ownership](docs/documentation.md), the [operating model](docs/architecture/operating-model.md), [system outline](docs/architecture/system-outline.md), [system design](docs/architecture/system-design.md), [ADR index](docs/adr/README.md), and all relevant [topic pages](docs/topics/README.md). Audit the [endpoint map](docs/api-endpoints.md), [component catalog](docs/data-components.md) and [testing requirements](docs/testing-strategy.md) together.
+## Implementation discipline
 
-For implementation, read all of [CODING_STANDARDS.md](CODING_STANDARDS.md). Verification follows [the local verification skill](.agents/skills/verify-atlas/SKILL.md). The current repository has no inherited verifier to run.
+Use ordinary modules, small interfaces, and supported libraries. Generate only
+mechanical representations; never patch generated output. Keep private SQL and
+storage types out of Protocol. Do not build a framework for a hypothetical caller.
 
-## Authority
+Validate untrusted input and responses at the actual consuming boundary. Preserve
+omitted versus null values, exact identifiers, and numeric precision. A generated
+type is not runtime validation. Do not silence type errors with unsafe casts,
+blanket suppressions, or an untyped escape hatch.
 
-The user chooses observable behavior; engineering chooses internal mechanisms that preserve it. Accepted requirements and architectural decisions remain binding. An implementation difficulty or reviewer suggestion cannot authorize weakening them. Identify proposals and contradictions; do not silently change a requirement to match code.
+Name the owner of each transaction, process, stream, timer, and cleanup. Recheck
+authority after waits. Record committed effects before honoring later cancellation.
+A lost response is not proof that nothing happened.
 
-Resolve engineering facts independently. Ask only about an actual product choice not settled by the documentation or an irreversible action outside authorization. Continue independent authorized work around that decision. Existing authorization remains valid.
+Bound work before proportional allocation, including copies, decoded data,
+concurrent consumers, and accumulated state. Await writers before deleting their
+storage. Keep primary and cleanup failures visible; never report an unverified
+cleanup as success.
 
-An audit request does not authorize implementation. An implementation request does not by itself authorize publishing or merging a PR. Do not modify the source repository or its issues. Publish a PR only when requested. Merge only when explicitly authorized.
+## Verification and completion
 
-## Evidence
+Extend the smallest real workflow that proves the change. Independent expected
+results must catch a plausible broken implementation; generated snapshots alone
+are not an oracle. Do not add a helper test merely to satisfy a test-count habit.
 
-Prefer verifiable end-to-end outcomes and independently authored expectations over scaffolding and test counts. Keep findings, speculation, accepted design and observed behavior distinct. Log significant decisions without turning audit trails into another requirements authority. Update governing documentation when an authorized decision changes it.
+Report the exact changed scope, checks actually run, failures, and unrun coverage.
+Do not weaken a check to get green. This documentation-only baseline has no build
+or test command; introduce commands only with the implementation that supplies them.
