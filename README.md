@@ -1,19 +1,38 @@
-# Atlas Core experiments
+# Atlas
 
-Atlas Core is a control plane for observing Entities, preserving operational data and tasking Assets. This repository is the documentation-only starting point for an independent PStack implementation experiment.
+**Atlas coordinates field systems: observe what exists, ask Assets to do work,
+and retain what they report.**
 
-**Nothing is implemented here.** There is no application source, executable Protocol schema, test suite, fixture, generator, build setup or CI. Behavioral contracts and required test scenarios describe the target system, not shipped features. Historical documentation does not establish capabilities in this repository.
+This repository is a documentation-only design experiment. Nothing here claims
+an implemented API, generated package, passing runtime, or qualified deployment.
 
-## Start here
+## Three layers, one contract
 
-| Goal | Read |
-| --- | --- |
-| Start the specification audit | [PStack starting prompts](PSTACK_START.md) |
-| Find the system requirements | [Documentation index](docs/README.md) |
-| Understand scope and decision authority | [Agent guide](AGENTS.md) and [Contributing](CONTRIBUTING.md) |
-| Distinguish requirements from historical evidence | [Documentation context](docs/documentation-context.md) |
-| See the proposed implementation sequence | [Build plan](docs/build-plan.md), to be written by PStack |
+| Layer | Owns | Does not own |
+| --- | --- | --- |
+| **Atlas Protocol** | Shared vocabulary, data, messages, API contracts, observable rules | Databases, processes, implementation |
+| **Atlas Core** | A running server that enforces Protocol and retains state | Physical execution on a drone |
+| **Atlas SDK** | A convenient TypeScript client for Protocol | Server policy or private Core internals |
 
-The first deliverables are `docs/reviews/specification-audit.md` and PStack's own build plan. Audit first. Do not implement, copy an earlier solution or import its task schedule during that run.
+Protocol is foundational. Core implements it; SDK speaks it. Applications use
+SDK to reach Core. A gateway translates radio traffic; the Asset runtime executes.
+Both remain outside Core. Adequate IP connectivity is the SDK boundary.
 
-This repository has its own documentation-only history. Work here does not modify Atlas Core or its open PRs. PStack must be installed in the development environment separately; these files do not start an agent or coordinator.
+**Contract-first, not generator-first.** Generate repetitive declarations where
+stock tools help. Write Core behavior and SDK workflows as ordinary code.
+
+## Read in this order
+
+1. [Protocol](Atlas%20Protocol/README.md): what Atlas means and promises.
+2. [Core](Atlas%20Core/README.md): how the server provides those promises.
+3. [SDK](Atlas%20SDK/README.md): how other programs use them.
+
+Each folder's README gives its short reading order. Contributors also read
+[AGENTS.md](AGENTS.md). There is no separate glossary, decision archive, or audit
+folder to reconcile. Earlier explanations remain in Git history, not as a second
+active specification.
+
+These pages are the current design baseline, not a complete executable wire
+specification. Before implementing a workflow, finish its concrete schemas and
+acceptance examples in their owning layer. Do not resurrect old implementation
+plans, claimed test results, or superseded rules by default.

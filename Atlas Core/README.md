@@ -1,19 +1,57 @@
-# Core foundation
+# Atlas Core
 
-This folder contains the Core deliverable's generated public models, runtime dependency locks and structural HTTP validation adapter. It is not an operational Core server. The [Slice 0 evidence](../tests/contract/README.md) and [Protocol ownership](../Atlas%20Protocol/README.md) describe the boundary.
+**Core is the running authority for one Atlas installation.** It validates requests,
+records intent and evidence, stores data, and serves clients. It does not fly the
+drone or turn a network acknowledgment into physical success.
 
-The [focused Plugin bookkeeping component](plugins/README.md) implements the Core-module/private-Plugin-process seam from [spec #117](https://github.com/atlas-field-systems/atlas-core/issues/117), with its own real-storage workflows and explicit remaining integration requirements.
+## Deployment
 
-`httpcontract.ValidateRequests(spec, next, maxJSONBytes)` requires a positive body bound and installs it before ordinary request reads. It checks the [JSON request representation](../Atlas%20Protocol/README.md#json-request-representation) on the original bytes before the pinned OpenAPI validator and generated strict handler decode them. Importing the adapter registers the supported UUID format for HTTP and non-HTTP canonical schema consumers. `RequestError` is the shared hook for middleware, parameter binding and strict JSON decoding. `WriteError` emits Protocol's typed JSON error envelope with a diagnostic UUID and known Dataset context from the owner-set response header. Owning modules still supply authorization, complete-result validation, Dataset admission and commit decisions. The [request/patch checks](../tests/contract/README-96.md) exercise rejection before fixture effects and persisted read-back.
+Start with one Go server, ordinary internal modules, one SQLite database in WAL
+mode, and local Object files. Core and independently managed Plugins run in Docker
+containers on a Linux host. A small host manager survives Core for local lifecycle
+control. These are selected implementation choices, not Protocol requirements.
 
-`httpcontract.ValidateBinaryRequests(spec, next, operationID, maxBytes, maxJSONBytes)` selects one binary operation from the loaded contract, validates its header/path/media metadata, and bounds its body stream without the general buffering decoder. Other operations retain ordinary request validation with their separate body bound. Required binary bodies are checked using HTTP framing before wrapping the stream, even when an outer wrapper hides `http.NoBody`; an absent body is distinct from an explicitly empty stream. The handler owns translation of size-limit errors and private attempt cleanup. The [binary checks](../tests/contract/README-100.md) qualify the adapter through generated/direct HTTP and real files at a 1,024-byte fixture limit.
+Operators and field integrations connect over adequate IP using the SDK. Gateway
+software and constrained-radio transport are separate projects. The UI is another
+client; closing it does not stop Core. Installed local operation needs no internet,
+although an individual integration may depend on an external service.
 
-`generated/protocol` comes only from the public Protocol baseline. Everything under `tests/contractfixture` is test tooling, including its generated strict interface, storage bindings and executable. Its loopback routes and SQLite tables implement no production business capability.
+## Ownership inside the server
 
-Use the repository's single verification entry point:
+| Owner | Responsibility |
+| --- | --- |
+| Identity | Authenticate principals and enforce their bindings |
+| Entities/reporting | Descriptions, accepted observations, contact, and movement |
+| Tasks | Command admission, intent, requested order, and reported execution |
+| Objects | Complete content publication, metadata, holds, and cleanup |
+| Plugins | Installed capability policy and recorded Operation attempts |
+| Synchronization | Publish and replay whole committed changes |
+| Host manager | Container control and destructive work that must outlive Core |
 
-```sh
-python3 scripts/verify.py --bootstrap
-```
+These are responsibilities, not seven microservices. Use direct calls and a shared
+transaction boundary. Keep each domain's tables private behind its owner. Add no
+generic event bus, scheduler service, or module framework without a concrete need.
 
-The verifier executes Go tests freshly on every run, including the message checks whose shared corpus is outside this module. Go compilation and dependency caches remain available. The [verification evidence](../tests/contract/README.md) describes the required real-toolchain regression and passing-report lifecycle.
+## Generation boundary
+
+Use Protocol's OpenAPI definitions for Go types/server interfaces and TypeScript
+transport types. The selected starting tools are `oapi-codegen`,
+`openapi-typescript`, and `openapi-fetch`. Use `sqlc` for bindings from Core's
+**handwritten private SQL**, never by turning public resources into database tables.
+
+Handwrite authorization, validation integration, Task rules, transactions, file
+publication, Plugin supervision, and recovery. SDK workflow code is also handwritten.
+Use stock configuration; no custom schema language, endpoint-specific templates,
+patched generated files, or duplicate wrapper API. A narrow handwritten binding
+is preferable when generation makes an exceptional route harder to understand.
+
+Pin and qualify tools with the first implemented workflow. This repo contains no
+qualified locks or generated packages yet. Measure saved maintenance, not generated
+line count. Removing repeated declarations is the goal; generating most of Core is not.
+
+## Reading order
+
+[Storage](storage.md) → [Lifecycle](lifecycle.md) → [Plugins](plugins.md) →
+[Delivery](delivery.md) → [Qualification](qualification.md).
+
+Shared behavior remains in [Protocol](../Atlas%20Protocol/README.md).

@@ -1,27 +1,48 @@
-# SDK foundation
+# Atlas SDK
 
-The consumer entry point exports the supported `openapi-fetch` transport, generated public Protocol types, schema-driven validation adapters and local representative Command Catalog lookup. It implements no operational helper or full synchronization mode yet. The [Slice 0 fixture](../tests/contract/README.md) uses these same adapters against separately generated test-only paths.
+**SDK is the TypeScript way to use Atlas, not another source of server policy.**
+It consumes [Protocol](../Atlas%20Protocol/README.md), communicates with Core, and
+provides a small set of handwritten client workflows over generated declarations.
+It must not import Core's database, private types, or internal service interfaces.
 
-`responseValidation(document, context, { maxJSONBytes })` supplies middleware for a transport client. It requires an explicit positive safe-integer JSON response bound and enforces that byte limit while reading, before decoding or schema validation. It checks declared response status/media type, required headers and present header schemas, and the referenced JSON schema before `openapi-fetch` returns interpreted data. Dataset/version context must agree with the selected context wherever declared. Validated Dataset UUIDs compare by identity across canonical, uppercase and UUID URN spellings; protocol versions compare exactly. JSON envelope Dataset context is checked too, including error envelopes. JSON validation parses a bounded clone, leaving the returned body available; declared raw JSON, binary and no-body responses retain their own representation. `ResponseValidationError` reports a typed reason, including `body_size` for oversized JSON, HTTP status and safe method/schema-path context; it makes no decision about mutation commitment or safe retry.
+## Two explicit read modes
 
-The [qualified response declarations](../Atlas%20Protocol/README.md#supported-schema-profile) use exact HTTP status codes, inline Response Objects and local Header Object references. Construction rejects `default`, status ranges such as `2XX` and other non-exact status keys with a configuration `Error` identifying the declaration and operation, including when mixed with exact statuses. This happens before requests, separately from runtime `ResponseValidationError` failures. Response Object `$ref` resolution remains unqualified; local Header reference support does not qualify a general OpenAPI resolver.
+| Mode | Behavior |
+| --- | --- |
+| HTTP, default | Read on demand from Core; no maintained replica |
+| Full synchronization, opt-in | Maintain all Entities, Tasks, and ready Object metadata in one in-memory picture |
 
-Responses with no content declaration must contain zero body bytes. The adapter checks a clone, rejects the first nonempty chunk with the typed `body` reason and cancels the refused stream. Genuine empty replies retain their original Response and declared header/context checks.
+Both modes use SDK. In Full mode, resource reads, full queries, changed-since, and
+subscriptions use the local picture. No hidden HTTP fallback or per-call bypass
+pretends to repair incomplete coverage. The public query semantics stay consistent.
 
-Response construction visits only HTTP method entries, so shared path parameters and other Path Item metadata are permitted. Local Header Object references apply URI percent-decoding before JSON Pointer token decoding, preserving equivalent fragment spellings. Media matching validates the complete Content-Type syntax, then ignores token casing and valid parameters while JSON schema references retain the authored content key. Each declared `application/json` or `+json` response has its own validator, selected by the received media type. Construction rejects JSON declarations that collide after normalization, so one schema cannot silently replace another. JSON decoding rejects invalid UTF-8 before schema validation rather than silently replacing bytes. A status may offer JSON and binary content without applying the JSON validator to binary bytes. The [response checks](../tests/contract/README-97.md) cover these adapter boundaries. The caller selects the JSON limit; fixture bounds establish no production sizing or large-file memory guarantee.
+Object bytes, Plugin Operations/discovery, operator/key administration, and movement/
+activity history use explicit HTTP operations in both modes. They are outside the
+picture. All mutations go to Core. There is no persistent SDK cache, offline write
+queue, hybrid/selective mode, or shared cross-tab replica.
 
-The future operational SDK owns validation wiring and mutation-outcome handling under [connection setup](../docs/topics/sdk.md#connection-setup) and [mutation outcomes and retries](../docs/topics/sdk.md#mutation-outcomes-and-retries). This foundation provides optional transport middleware, without an operational constructor, retained submission descriptors or automatic retries.
+## Package boundary
 
-`contractValidator(document)` compiles references into the authored canonical document with the pinned Ajv implementation. It preserves omission/null/zero and performs no value coercion, default insertion or property removal. It supports the [qualified profile](../Atlas%20Protocol/README.md#supported-schema-profile).
+Protocol supplies shared types, schemas, errors, Command definitions, and transport
+contracts. SDK supplies connection setup, runtime response validation, safe prepared
+requests, replayable file inputs, Asset-report helpers, and optional picture upkeep.
+Use a stock typed HTTP client before adding generated wrappers for every endpoint.
 
-`lookupCommand(name)` reads representative Move To/Pause metadata from the installed canonical Protocol artifact and returns `{ protocolVersion, inputSchema, metadata, validateInput }`, or `undefined` for an unknown name. `metadata` is the Protocol's `x-atlas-command` object with its snake_case names unchanged. It performs no network request. The [Catalog evidence](../tests/contract/README-99.md) records the incomplete binding and operational exclusions.
+The Command Catalog is available locally from the installed Protocol artifact.
+Asset helpers prepare registration, process/report identity, and reconciliation;
+they do not execute or schedule physical work. Asset software must retain its own
+identity and execution evidence. Gateway firmware and radio encoding remain external.
 
-Consumer exports select compiled JavaScript and TypeScript declarations in `dist`, including the canonical Protocol artifact used by the Catalog. The `/protocol` export exposes the public generated declarations. The verifier rebuilds from absent `dist`, then loads the package by name with ordinary Node and checks consumer imports through both exports. Test-only routes, schemas, fixture SQL and response switches stay outside the consumer package. Public `paths` is intentionally empty until an operational slice authors its endpoints. No publication or release-version range is established by this package.
+## Connection behavior
 
-The required TypeScript lint command uses the pinned compiler API for handwritten SDK and contract code. It rejects explicit `any`, suppression directives, nested type assertions and functions that only assert a parameter's type. Const assertions and `satisfies` remain supported. The shared compiler configuration also rejects unused locals and parameters. Prettier formats the same handwritten TypeScript and the JavaScript tooling; `npm run format:check` is a required check and `npm run format` applies it. Only `*.type-test.ts` files under SDK checks or contract tests may use `@ts-expect-error`; their required compiler checks fail when the intended error disappears. Other assertion invariants still require review under the [code conventions](../CODING_STANDARDS.md#types-and-language-conventions).
+Configure base URL, credential provider, explicit mode, timeouts, limits, and normal
+TLS trust. Discover Dataset and mutually supported Protocol edition. Validate actual
+response context rather than silently accepting a different Dataset or edition.
 
-Run all required checks from the repository root:
+WebSocket authentication precedes data, with a bounded authentication window.
+Transport failures can reconnect with bounded backoff; authorization failures pause
+until credentials change. Do not calculate clock offsets or automatically replay
+mutations after reconnect.
 
-```sh
-python3 scripts/verify.py --bootstrap
-```
+[Requests](requests.md) explains write outcomes. [Picture](picture.md) explains
+local state and recovery. Neither is generated from Core implementation.
