@@ -16,7 +16,7 @@ Apply the [deep-module criteria](../../CODING_STANDARDS.md#structure-and-interfa
 
 ## SDK as the supported entry point
 
-Participants on IP links without bandwidth limits interact with Core through the Atlas SDK, which composes Core's API without taking over Core's authentication, authorization, Task transitions, Object readiness or committed-state consistency. [SDK](../topics/sdk.md) owns its consumers, HTTP mode and Full synchronization mode, the Local operational picture, write results, helpers and the [Asset client](../topics/sdk.md#asset-client), which is the SDK side of [shared Asset report acceptance](#shared-asset-report-acceptance).
+Participants on IP links with adequate bandwidth interact with Core through the Atlas SDK, which composes Core's API without taking over Core's authentication, authorization, Task transitions, Object readiness or committed-state consistency. [SDK](../topics/sdk.md) owns its consumers, HTTP mode and Full synchronization mode, the Local operational picture, write results, helpers and the [Asset client](../topics/sdk.md#asset-client), which is the SDK side of [shared Asset report acceptance](#shared-asset-report-acceptance).
 
 ## Local administration
 
