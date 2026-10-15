@@ -16,7 +16,7 @@ The first task is [the PStack specification audit](../PSTACK_START.md#first-run-
 
 The snapshot predates the accepted 9 October 2026 clock decision. [ADR-0029](adr/0029-use-deployment-clocks-and-preserve-event-times.md) supersedes ADR-0025 and any older requirement for SDK or gateway Core-time offset estimation, offset-derived timestamp rewriting, or clock-uncertainty budgets. Correct clocks are supplied by deployment. Preserve original source event and observation times separately from Core receipt and change times. This is an existing accepted decision carried into the experiment, not a new product choice by the exporter.
 
-Older topic and testing prose may still describe the superseded mechanism. Treat it as superseded, not an equally valid competing requirement. The initial audit must identify those occurrences and propose a consistent edit under ADR-0029 before clock-sensitive implementation. This setup has not performed that full content reconciliation or the substantive specification audit.
+The active reporting, SDK, Task, Track, identity and history topics, endpoint and component maps, and testing requirements are reconciled under ADR-0029. Optional nullable `clock_uncertainty_ms` remains inert compatibility metadata with no required initial-path computation or age, Contact or uncertainty-budget effect. Current-process challenges, monotonic expiry, source-time preservation and defensive future-observation handling remain required. Superseded ADR-0025 and historical research retain their original context; they do not restore the rejected mechanism. This documentation reconciliation is not runtime implementation or test evidence.
 
 ## Historical references
 

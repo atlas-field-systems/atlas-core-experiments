@@ -107,7 +107,7 @@ Immediate means prompt Asset handling once received, not guaranteed zero latency
 
 ### Command validity and deadlines
 
-Commands must declare their validity behavior, and a Task may carry an optional execution deadline. No universal deadline or start timeout is selected. The Asset checks validity before acting and reports the outcome; a late request must not silently bypass its validity rule. Core does not schedule starts or infer an execution outcome from elapsed time. Validity and deadlines are judged in [Core time](../adr/0025-use-core-time-as-the-installation-reference-clock.md). Exact deadline fields and uncertainty handling remain open. Pause and Resume validity follows [control expiry](#control-ordering-and-expiry).
+Commands must declare their validity behavior, and a Task may carry an optional execution deadline. No universal deadline or start timeout is selected. The Asset checks validity before acting and reports the outcome; a late request must not silently bypass its validity rule. Core does not schedule starts or infer an execution outcome from elapsed time. Validity and deadlines use supplied source UTC event times and correct deployment clocks under [ADR-0029](../adr/0029-use-deployment-clocks-and-preserve-event-times.md). The bounded queued coordinate-target Move To workflow has no execution deadline and starts when received and the Asset OS's queue permits it. Exact deadline fields for other Commands remain open. Pause and Resume validity follows [control expiry](#control-ordering-and-expiry).
 
 ## Queue revisions
 
@@ -155,7 +155,7 @@ An older Pause or Resume cannot undo newer control intent the Asset has already 
 
 The Asset records older superseded requests explicitly, without applying their effects or silently dropping their Task records. A never-executed expired or superseded request reports a non-success outcome with a reason under the existing Failed contract; no Task status is added. An already-terminal Task stays terminal. A previously applied Pause remains a historical successful action even after a later Resume changes the Asset's state. Delayed reports cannot roll Operational status back over a newer applied control action. A Cancellation requested Task keeps its cancellation intent until the assigned Asset confirms or declines it or reports another terminal outcome under [cancellation requests](#cancellation-requests); control actions never clear it.
 
-Pause never expires: stopping late is still safe, so a delayed Pause applies when the Asset receives it unless newer control intent supersedes it. Resume carries a Command-declared default expiry, because restarting work late is the dangerous direction. The Asset judges expiry in Core time. An expired Resume reports Failed with an expiry reason, and the Asset stays paused until a new Resume. An expired newer control must not trigger fallback execution of an older superseded control.
+Pause never expires: stopping late is still safe, so a delayed Pause applies when the Asset receives it unless newer control intent supersedes it. Resume carries a Command-declared default expiry, because restarting work late is the dangerous direction. The Asset judges expiry using supplied source UTC event times and its correct deployment-provided clock. An expired Resume reports Failed with an expiry reason, and the Asset stays paused until a new Resume. An expired newer control must not trigger fallback execution of an older superseded control.
 
 The Command contract must cover the exact interaction of expiry, validated report order and physical actions already in progress. Core supplies authoritative request order and stores reports; it does not withhold or release execution.
 
@@ -215,7 +215,7 @@ Core accepts a valid terminal report as what happened, even if it was made again
 
 ## Queue representation and coherent reads
 
-Tasks owns the `task_queue` aggregate included in every Asset Entity, even when empty. It is Derived data, not a client-editable component. Entity snapshots and changes carry its complete value; Task changes and their affected queue value share one [commit frame](sdk.md#synchronization-wire-and-application-boundary). This uses existing full synchronization, not another resource service or SDK mode. An order edit changes this one aggregate, not a second cached position in every Task resource; consumers derive Task positions from the aggregate.
+Tasks owns the `task_queue` aggregate included in every Asset Entity, even when empty. It is Derived data, not a client-editable component. Entity snapshots and changes carry its complete value; Task changes and their affected queue value share one [complete Protocol data message](sdk.md#synchronization-wire-and-application-boundary). This uses existing full synchronization, not another resource service or SDK mode. An order edit changes this one aggregate, not a second cached position in every Task resource; consumers derive Task positions from the aggregate.
 
 | Field | Meaning |
 | --- | --- |
@@ -245,7 +245,7 @@ Assigned-work pages carry one `queue_revision`, the queue aggregate and an opaqu
 | Requested order A,B,C; request cancellation of B, then confirm cancellation or report another terminal outcome | B's slot is removed; requested order remains A,C and a late decline cannot reopen B |
 | Confirmation of revision 7 follows confirmation of revision 9 | Preserve confirmation 9; retain historical evidence without rolling it backward |
 | Queue becomes empty between assigned-work pages | Continuation fails `page_changed`; restart returns a coherent empty aggregate |
-| A,B reorder crosses the replay page boundary | One complete aggregate carries both positions; pagination cannot split its array. If a related Task/Entity commit is split into resource frames, expose neither part until that commit is complete |
+| A,B reorder crosses the replay page boundary | One complete aggregate carries both positions; pagination cannot split its array. Interrupt a related Task/Entity commit's single whole data message before complete validation: neither resource image becomes visible and no cursor advances until the complete message is validated and applied atomically |
 
 ## Result declarations and execution fixtures
 
@@ -291,7 +291,7 @@ Task reads contain declared references, including unpublished IDs. `GET /tasks/{
 The [queue representation](#queue-representation-and-coherent-reads), [shared report context](asset-reporting.md#shared-report-context), [synchronization contract](sdk.md#synchronization-wire-and-application-boundary), [result declarations](#result-declarations-and-execution-fixtures) and [MVP spatial contract](spatial-data.md) settle the corresponding specification tickets. Author their complete OpenAPI schemas and SDK signatures in their implementation slices.
 
 - Command variants beyond the MVP, including their progress details, failure reasons and capability fields.
-- Command-specific deadlines and validation for conflicting immediate actions beyond Pause and Resume, preserving the accepted control ordering and Core-time rules.
+- Command-specific deadlines and validation for conflicting immediate actions beyond Pause and Resume, preserving the accepted control ordering and source-time validity rules under ADR-0029.
 - Asset-specific execution recovery and behavior after cancellation or failure of queued work. Core records the Asset's evidence and does not select its scheduling policy.
 - Grouping Tasks across several Assets remains a proposal.
 
@@ -307,14 +307,14 @@ The [queue representation](#queue-representation-and-coherent-reads), [shared re
 - [ADR-0028](../adr/0028-trust-gateways-to-author-bound-asset-reports.md): gateways translate bound-Asset evidence; downstream Tasks and process generations remain distinct from gateway lifetime.
 - [ADR-0023](../adr/0023-protect-required-entity-references-during-tasks.md): unfinished Tasks protect required Track and Geofeature references.
 - [ADR-0024](../adr/0024-use-live-geofeature-geometry-in-tasks.md): Tasks follow live Geofeature geometry until their cutoff.
-- [ADR-0025](../adr/0025-use-core-time-as-the-installation-reference-clock.md): Command validity, deadlines and Resume expiry are judged in Core time.
+- [ADR-0029](../adr/0029-use-deployment-clocks-and-preserve-event-times.md): Command validity and Resume expiry use source UTC event times and correct deployment clocks; bounded queued coordinate-target Move To has no execution deadline.
 
 ## Test evidence
 
 These rows of the [required scenario coverage](../testing-strategy.md#required-scenario-coverage) apply:
 
 - Task lifecycle: transitions, cancellation requested versus confirmed or declined, completion and failure races, dropped Command support and terminal immutability.
-- Immediate Commands and Pause: overlapping immediate work, Pause, Resume, control ordering and expiry in Core time.
+- Immediate Commands and Pause: overlapping immediate work, Pause, Resume, control ordering and expiry using source UTC event times and correct deployment clocks.
 - Task queues: concurrent revisions, delayed confirmations, reconnect reconciliation and exclusion of started, cancellation-requested and terminal Tasks.
 - Asset-process recovery: reconciliation before execution and obsolete-process rejection.
 - Scan geometry and result completion: both report and edit commit orders and both result arrival orders.
