@@ -17,7 +17,7 @@ The shared specification of Atlas resources, operations, messages and externally
 _Avoid_: database schema, SDK implementation
 
 **Atlas SDK**:
-The supported general client library that participants on IP links without bandwidth limits, including applications, Plugins, IP-connected Assets and radio gateways, use to interact with Atlas Core.
+The supported general client library that participants on IP links with adequate bandwidth, including applications, Plugins, IP-connected Assets and radio gateways, use to interact with Atlas Core in either HTTP mode or Full synchronization mode.
 _Avoid_: Protocol definition, Core implementation, Asset OS, radio protocol
 
 **Asset client**:
@@ -33,7 +33,7 @@ The Atlas SDK mode that maintains a Local operational picture of the whole Datas
 _Avoid_: full sync, hybrid mode, replica mode
 
 **Radio gateway**:
-Software connecting Atlas Core with bandwidth-limited Assets over a radio transport, trusted to translate and submit reports for its bound Assets while preserving their identities and the meaning of their Tasks and reports. It has its own identity; gateway taskability is outside the current scope and remains open for the future.
+External software that uses the Atlas SDK to connect Atlas Core with bandwidth-limited Assets over a radio transport, trusted to translate and submit reports for its bound Assets while preserving their identities and the meaning of their Tasks and reports. Gateway implementation and radio transport are outside Atlas Core. It has its own identity; gateway taskability is outside the current scope and remains open for the future.
 _Avoid_: Asset OS, Source Gateway, Core module
 
 **Core release**:
@@ -178,7 +178,7 @@ An Entity representing an observed subject, whether stationary or moving. A dete
 _Avoid_: Asset, stream item
 
 **Track publisher**:
-The single source responsible for a Track's Observed data, whose identity is distinct from an individual Plugin installation. It is distinct from an operator editing Descriptive data and from any External sources it consults.
+The single source responsible for a Track's Observed data, whose identity is distinct from an individual Plugin installation. An Asset can be that source. When a gateway relays a drone's observations, the drone owns the Track and the gateway does not become its publisher. A publisher is distinct from an operator editing Descriptive data and from any External sources it consults.
 _Avoid_: descriptive editor, Task assignee
 
 **Geofeature**:

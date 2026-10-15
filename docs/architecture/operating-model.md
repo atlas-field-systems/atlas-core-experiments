@@ -13,6 +13,8 @@ This document owns product scope, workload and field assumptions. Examples illus
 
 An Asset temporarily losing radio contact does not end the mission. Closing the Command Interface does not stop Core. Restart, Reset and release updates occur outside missions, and active mission continuity across Core restart is excluded under the [Mission boundary](../topics/dataset-lifecycle.md#missions), an operating assumption rather than a claim that hardware or processes cannot fail.
 
+In the primary field workflow, a drone sends telemetry, observed Tracks and Task progress over a radio link to an external gateway. The gateway uses the SDK over an adequate IP link to Core; an operator application uses the SDK to read that data and submit Commands through Core and the gateway to the drone. The drone owns Tracks it observes, and the gateway reports for it under [Asset-owned Track observations](../topics/identity-and-access.md#asset-owned-track-observations). Core owns validated operational records and atomic changes; the gateway owns radio translation and the drone owns execution.
+
 ## Expected workload
 
 The first deployment uses one Core server with field devices. A busy run has roughly 20 Assets, 100–200 Tracks and one or two operators. Thousands are a future scale to evaluate, not a promised first-version capacity. The user accepted the following provisional sizing targets on 3 October 2026; they are inputs to testing, not measured capacity or automatic runtime limits. A mission or session remains a usage description, not a new API resource.

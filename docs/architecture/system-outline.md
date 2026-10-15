@@ -8,6 +8,8 @@ Read the [operating model](operating-model.md) for users and workflows, the [sys
 
 The Atlas Core system lives in an `Atlas Core/` folder with sibling `Atlas SDK/` and `Atlas Protocol/` deliverables. The [Slice 0 foundation](../../tests/contract/README.md) establishes those folders; operational responsibility implementations remain later work. The Command Interface is outside the Core system and folder; its eventual repository placement is undecided. Host installation tools and publishing workflows may live elsewhere in this repository without becoming server modules.
 
+Radio gateways are external SDK consumers. Core and the SDK define their reporting, authorization and assigned-work contracts. Gateway implementation and radio transport remain outside Atlas Core; Core tests use simulated external SDK consumers to exercise those contracts.
+
 [ADR-0001](../adr/0001-release-core-sdk-and-protocol-together.md) defines the coordinated Core/SDK/Protocol release. [ADR-0005](../adr/0005-allow-compatible-client-versions.md) defines client compatibility and retained-setup validation. Shared numbering does not settle publication mechanics. [ADR-0016](../adr/0016-use-go-sqlite-and-openapi-tooling.md) selects the stack; [ADR-0017](../adr/0017-deploy-core-and-plugins-as-docker-containers.md) places Core modules together in one container with sibling Plugin containers.
 
 ## Define responsibilities separately from release artifacts

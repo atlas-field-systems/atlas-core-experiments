@@ -30,15 +30,27 @@ Plugins are trusted code with broad operational access, not isolated tenants. Th
 
 Each radio gateway has its own gateway identity, provisioned through Core, and explicit bindings to its downstream Assets. It may read like any authenticated client. Core trusts an authenticated gateway to translate, reconstruct and submit Core-facing reports for its bound Assets and checks that binding on every reporting path. Core does not independently verify a downstream Asset's Core-format signature on this path. The constrained radio grammar need not carry Core report envelopes or signatures; the gateway integration is responsible for obtaining and interpreting the Asset evidence.
 
+The same bound relay may create and update Tracks observed by its downstream Asset under [drone-owned observations](#asset-owned-track-observations). This is observation authority for that Asset, not gateway ownership of the Tracks or a general descriptive-edit permission.
+
 The gateway may deliver assigned work only for its bound Assets. Each downstream Asset keeps its own ID, Task assignments and outcomes. A gateway has no administrative rights, cannot act as an unbound Asset and stops submitting reports or assigned work for a retired, deleted or revoked Asset. Binding authority does not authorize invented execution outcomes or make the gateway's live connection evidence of downstream Contact. The [reporting rules](asset-reporting.md#report-authority-and-relay) preserve process generations, ordering, retries and Dataset boundaries through translation. Gateway restart is a communication interruption, not evidence of downstream process replacement.
 
 Gateways are relay integrations and are not taskable Assets in the current scope. Whether a future gateway also receives its own Tasks remains open; this decision neither prohibits that model nor assumes it would require no Core changes.
+
+### Asset-owned Track observations
+
+An Asset may originate Tracks for subjects it observes. Core associates their publisher with that Asset's retained identity. A gateway may create and update those observations only for an explicitly bound Asset, preserving the Asset's publisher rather than using the gateway principal as publisher.
+
+An authorized gateway replacement for the same Asset does not transfer Track ownership or create a new logical source. Core checks the current relay binding and publisher authority on every observation mutation. Withdrawing a binding prevents that gateway from making further observation writes for the Asset. Gateway changes preserve source-scoped observation identity and ordering. This does not permit unbound reports, cross-publisher writes, gateway administration, or post-creation Descriptive edits by Asset/gateway credentials. One-publisher observation identity, ordering, age, correction, and Dataset rules still apply.
+
+Track observations alone do not refresh Asset Contact. Separate Asset reports must independently satisfy ordinary report acceptance and freshness rules.
+
+Concrete relay fields, source-to-publisher representation, binding-change authorization and correlation across gateway restart/replacement must be defined before the first affected Core proof. They are contract prerequisites, not work deferred until the later complete gateway milestone. [ADR-0030](../adr/0030-attribute-asset-track-observations-to-the-asset.md) records the accepted ownership and trust boundary; it does not establish a completed gateway implementation or physical-radio guarantee.
 
 ## Publisher continuity
 
 Track publishers use an opaque `publisher_id` distinct from an authenticated `principal_id` and, for managed Plugins, installation `plugin_id` and immutable release identity. Core resolves publisher authority from the authenticated binding; a submitted publisher ID is not permission.
 
-For a caller already permitted to create Tracks that has no managed publisher binding, Core assigns and reserves one publisher ID to its retained principal atomically with its first Track creation. The request cannot nominate another publisher. Subsequent creations and observations use that binding. A replacement credential for the same retained principal preserves its publisher; a different principal receives a different publisher and creates separate Tracks. The reservation survives Restart and ordinary Reset until Hard Reset, without preserving Dataset observations or reviving revoked credentials. This adds no caller role and does not broaden Asset or gateway writes.
+For a caller already permitted to create Tracks that has no managed publisher binding, Core assigns and reserves one publisher ID to its retained principal atomically with its first Track creation. For [Asset-owned observations](#asset-owned-track-observations), resolve that publisher from the originating Asset's retained identity, not the relay's principal. The request cannot nominate another publisher. Subsequent creations and observations use that binding. A replacement credential for the same retained principal preserves its publisher; a different principal receives a different publisher and creates separate Tracks. The reservation survives Restart and ordinary Reset until Hard Reset, without preserving Dataset observations or reviving revoked credentials. Publisher allocation itself grants no additional mutation permission.
 
 For a managed Plugin, authenticated local management records a new publisher identity, its trusted package provenance and its current Plugin/principal association on first provisioning. Different logical publishers receive different IDs even when their package or display name matches. Managed Plugin reinstall uses the separate proof below because the replacement installation has a new principal.
 

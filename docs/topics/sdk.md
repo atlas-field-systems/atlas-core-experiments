@@ -6,15 +6,15 @@ The [delivered SDK foundation](../../Atlas%20SDK/README.md) provides generated t
 
 ## Who uses the general SDK
 
-Participants on IP links without bandwidth limits use the Atlas SDK to interact with Core: applications, Command Interfaces, Plugins, IP-connected Assets and radio gateways. A health-check client, Command Interface and data-processing Plugin use the same supported SDK, with behavior appropriate to their needs. The local CLI/TUI administers the installation through internal management interfaces and does not use the SDK or public API.
+Participants on IP links with adequate bandwidth use the Atlas SDK to interact with Core: applications, Command Interfaces, Plugins, IP-connected Assets and radio gateways. A health-check client, Command Interface and data-processing Plugin use the same supported SDK, with behavior appropriate to their needs. The local CLI/TUI administers the installation through internal management interfaces and does not use the SDK or public API.
 
-The boundary is bandwidth, not whether the participant is an Asset. An IP-connected Asset without bandwidth limits uses the general SDK like any other consumer, including the [Asset client](#asset-client) for its reports, and may use either mode; the extra traffic is acceptable on such links. Bandwidth-limited Assets do not run the general SDK: their execution and constrained transport belong to the Asset OS and a radio gateway, through which they reach Core.
+The boundary is bandwidth, not whether the participant is an Asset. An IP-connected Asset with adequate IP bandwidth uses the general SDK like any other consumer, including the [Asset client](#asset-client) for its reports, and may use either mode. Bandwidth use still requires qualification against the deployment. Bandwidth-limited Assets do not run the general SDK: their execution and constrained transport belong to the Asset OS and a radio gateway, through which they reach Core.
 
 The SDK is TypeScript only for now, so an IP-connected Asset's software either uses TypeScript or runs the SDK in a companion process. Another SDK language would be a separate decision.
 
 ### Bandwidth and gateways
 
-The general SDK assumes adequate IP bandwidth between its consumers and Core, including a gateway running on a different host or network. A gateway usually runs separately from Core, may run on the Core machine and need not share Core's local network. Adequate IP bandwidth is a deployment assumption, not a measured capacity or throughput guarantee, and IP access does not require internet access when Core is locally reachable. Numeric capacity and latency still require measurement.
+The general SDK assumes adequate IP bandwidth between its consumers and Core, including a gateway running on a different host or network. Gateways are external SDK consumers; their implementation and radio transport are outside Atlas Core. A gateway usually runs separately from Core, may run on the Core machine and need not share Core's local network. Adequate IP bandwidth is a deployment assumption, not a measured capacity or throughput guarantee, and IP access does not require internet access when Core is locally reachable. Numeric capacity and latency still require measurement.
 
 Gateways use HTTP mode or Full synchronization mode over their IP connection to Core, can obtain the full operational picture and select what crosses their radio link. No Core-side hybrid filtering is required. The constrained link is between the gateway and bandwidth-limited Assets; adequate gateway-to-Core bandwidth does not establish the capacity or behavior of that radio link. Gateway identity and relay limits follow [Radio gateways](identity-and-access.md#radio-gateways), and gateway translation of Asset reports follows the [relay rules](asset-reporting.md#report-authority-and-relay).
 
@@ -34,7 +34,7 @@ Protocol describes event and resource shapes. Core owns committed state, the rec
 
 ## Modes
 
-The SDK has two modes. Every mode writes to Core.
+The SDK has two modes. External consumers use the SDK in both modes, including HTTP requests made on demand. Every mode writes to Core.
 
 | Mode | When application code requests data | Background work | Intended use |
 | --- | --- | --- | --- |
@@ -43,7 +43,7 @@ The SDK has two modes. Every mode writes to Core.
 
 Basic API access starts no synchronized replica. Applications that need a maintained shared picture opt into synchronization; an application's role does not select its mode automatically. HTTP mode is the default; starting Full synchronization mode requires an explicit constructor option. The mode is selected at configuration, not by each caller choosing separate API and picture surfaces.
 
-The benefit of Full synchronization mode is shared state within one SDK instance: several components reading the same Entity through that instance use the same maintained picture instead of making repeated HTTP requests. Separate processes or browser tabs do not automatically share memory or a feed connection. A shared service is outside the current design.
+Full synchronization centralizes keeping a consumer's local operational data current, so each application does not implement its own synchronization system. Within one SDK instance, components repeatedly read the same maintained picture instead of making repeated HTTP requests. Occasional consumers retain HTTP mode. Separate processes or browser tabs do not automatically share memory or a feed connection. A shared service is outside the current design.
 
 ### One read interface
 
@@ -412,6 +412,8 @@ Topic-specific helper rules:
 
 The Asset client is the SDK module that owns all Core-facing traffic originating from an Asset, for IP-connected Assets, radio gateways and simulated-Asset test fixtures. Bandwidth-limited Assets do not run it; their gateway does. It covers registration and Enrollment, check-in, component and status reports, Task lifecycle reports, required-result uploads, queue adoption and conflict reports, and reading assigned work. It is the SDK side of [shared Asset report acceptance](../architecture/system-design.md#shared-asset-report-acceptance), with HTTP as its Core-facing transport adapter. SDK consumers submitting Asset-originated reports use the Asset client, which owns their coordination.
 
+Asset-originated Track observations use the ordinary Track operations under [Asset-owned Track observations](identity-and-access.md#asset-owned-track-observations). The Asset client preserves the originating Asset and gateway relay authority while retaining Track-specific observation identity and ordering. Define the concrete relay schema, binding-change authorization and source-scoped correlation before the first affected Core proof. Track observations alone do not refresh Asset Contact; separate Asset reports follow ordinary freshness rules. Track publisher identity must not silently become gateway identity.
+
 The Asset client owns:
 
 - First registration before a normal Asset credential exists, under enrollment authorization, with its retry identity, and re-registration after Reset, under [Asset registration](identity-and-access.md#asset-registration) and [Enrollment](identity-and-access.md#enrollment).
@@ -496,7 +498,7 @@ The [source reference](../atlas-modernization-reference.md#earlier-sdk-design) r
 
 ## Decisions
 
-- [ADR-0020](../adr/0020-limit-general-sdk-to-http-and-full-sync.md): the general SDK serves IP participants without bandwidth limits through HTTP mode and Full synchronization mode; Asset hybrid is deferred, and Core owns ordered catch-up/live delivery with bounded temporary snapshots.
+- [ADR-0020](../adr/0020-limit-general-sdk-to-http-and-full-sync.md): the general SDK serves IP participants with adequate bandwidth through HTTP mode and Full synchronization mode; Asset hybrid is deferred, and Core owns ordered catch-up/live delivery with bounded temporary snapshots.
 - [ADR-0018](../adr/0018-confirm-writes-when-core-commits.md): writes are confirmed when Core commits, and write responses stay out of picture updates.
 - [ADR-0015](../adr/0015-separate-start-stop-restart-and-reset.md): the SDK detects a Dataset change and discards old state rather than replaying old writes.
 - [ADR-0005](../adr/0005-allow-compatible-client-versions.md): compatible client versions within supported ranges.

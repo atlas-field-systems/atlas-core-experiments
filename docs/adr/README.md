@@ -33,3 +33,4 @@ ADRs record accepted tradeoffs and their rationale. Superseded records stay for 
 | [ADR-0027](0027-administer-core-configuration-locally.md) | Administer Core configuration locally | Accepted |
 | [ADR-0028](0028-trust-gateways-to-author-bound-asset-reports.md) | Trust gateways to author reports for bound Assets | Accepted |
 | [ADR-0029](0029-use-deployment-clocks-and-preserve-event-times.md) | Use deployment clocks and preserve event times | Accepted |
+| [ADR-0030](0030-attribute-asset-track-observations-to-the-asset.md) | Attribute Asset Track observations to the Asset | Accepted |

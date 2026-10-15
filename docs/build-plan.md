@@ -2,7 +2,9 @@
 
 Status: proposed on 15 October 2026. Nothing is approved for implementation, implemented or verified. This plan authorizes no publication or merge.
 
-Build one useful workflow at a time through the real SDK, Core and storage. Introduce shared facilities when that workflow needs them. The [specification audit](reviews/specification-audit.md) records proposed closures and engineering gates. No historical implementation, test corpus or ticket sequence supplies this plan.
+Build one useful workflow at a time through the real SDK, Core and storage. Introduce shared facilities when that workflow needs them. The [specification audit](reviews/specification-audit.md) records contract corrections and engineering gates. The [field-workflow audit](reviews/field-workflow-audit.md) records the drone, gateway and operator workflow and accepted ownership. No historical implementation, test corpus or ticket sequence supplies this plan.
+
+Prove the primary field workflow with simulated external gateway and operator consumers through real SDK/Core/storage boundaries. Gateway implementation and radio transport are outside Atlas Core; a radio emulator is not required for this Core proof.
 
 ## Planning basis
 
@@ -17,8 +19,8 @@ Complexity estimates are engineering judgments, not dates. Medium means a bounde
 | Increment | Observable outcome | Dependencies | Complexity |
 | --- | --- | --- | --- |
 | 0 | The next workflow has consistent contracts and independent expectations | Audit disposition | Medium |
-| 1 | An enrolled Asset reports state retained through a Core process restart | 0 for time, identity, edit and producer bounds | High |
-| 2 | Queued coordinate Move To completes or reconciles cancellation | 1 | High |
+| 1 | A bound gateway reports drone state retained through a Core process restart | 0 for time, identity, relay authority, edit and producer bounds | High |
+| 2 | A drone-owned detection is retained and queued coordinate Move To completes or reconciles cancellation | 1 | High |
 | 3 | Known file content publishes once and downloads unchanged | 1 | High |
 | 4 | An offline elevation Plugin runs and stops independently under host management | 1 | Very high |
 | 5 | The composed installation preserves Restart data and completes ordinary Reset | 2, 3, 4 | Very high |
@@ -36,7 +38,7 @@ Complexity estimates are engineering judgments, not dates. Medium means a bounde
 | 17 | Live geometry and required Entity guards survive edits and disconnection | 2, 14, 16 | High |
 | 18 | Result declarations protect Objects independently of execution outcomes | 3, 17 | High |
 | 19 | A Command observes its declared Track-age and stale-data behavior | 0, 2, 14 | Medium |
-| 20 | A bound gateway translates the supported contracts without replacing Asset authority | 8, 13, 15 through 19 | High |
+| 20 | The gateway contract covers the remaining control, recovery and result workflows | 8, 13, 15 through 19 | High |
 | 21 | Remaining administrative and documentation operations have explicit contracts | 5, 9, 10, 11 | Medium |
 | 22 | The composed release has recorded compatibility, capacity and durability evidence | All applicable implementation increments | High, with external dependencies |
 
@@ -46,27 +48,35 @@ When synchronization exists, each new writable resource joins its snapshot/repla
 
 ## 0. Reconcile contracts needed by the next workflow
 
-The documentation corrections resolve F1 through F5 under the accepted behavior, as recorded in the audit's [disposition](reviews/specification-audit.md#disposition-after-authorized-corrections). Their runtime acceptance evidence remains pending in the corresponding increments. Close G1 before first enrollment and set resource and combined-message admission bounds before writable producers grow. Other engineering details close immediately before their dependent workflow.
+The documentation corrections resolve F1 through F5 under the accepted behavior, as recorded in the audit's [disposition](reviews/specification-audit.md#disposition-after-authorized-corrections). Their runtime acceptance evidence remains pending in the corresponding increments. Close G1 and the gateway enrollment/report representation before increment 1. Before increment 2, define Track relay fields, source-to-publisher mapping, binding-change authorization, rejection after binding withdrawal, source-scoped observation correlation across gateway restart/replacement, and Track-write/Contact interaction. Distinguish direct-IP signatures/challenges from trusted gateway attestations. These gates cannot wait until increment 20. Set resource and combined-message admission bounds before writable producers grow. Other engineering details close immediately before their dependent workflow.
 
 Evidence is consistent owning prose, API/component-map agreement, independent request/result examples and explicit finding dispositions. Preserve mixed paragraphs' non-clock requirements and accepted defensive timestamp behavior. No runtime or dependencies belong here. Proposals remain proposals until the appropriate authority accepts them.
 
-## 1. Observe one direct-IP Asset
+## 1. Observe one drone through a gateway
 
-The Asset client registers a stable Asset, obtains a candidate-generation challenge and sends a signed current report. A real SDK client reads it. Duplicates have no second movement or Contact effect; historical evidence keeps source times and establishes no new Contact.
+A simulated external gateway uses its own authenticated SDK instance to register a stable bound drone and establish its downstream process authority. It constructs authenticated Core-facing reports from supplied drone evidence with original event times. Gateway attestations follow ADR-0028; the drone need not supply originating Core-format signatures or challenges. A simulated operator reads it through SDK HTTP mode. These are external-consumer test fixtures, not gateway software delivered by Core. Duplicates have no second movement or Contact effect; historical evidence keeps source times and establishes no new Contact.
+
+Use the SDK's supported Asset client with supplied drone evidence. Reject unbound relay and keep gateway liveness separate from downstream Contact. Qualify trusted relay separately from direct-IP signature and challenge proof.
+
+Keep a separate direct-IP fixture in this increment. Its SDK Asset client registers a stable Asset, obtains a candidate-generation challenge and sends a signed current report. A real operator SDK reads it. Prove first-process establishment, fresh Contact and signed-report acceptance on this path; gateway attestation is not a substitute.
 
 Introduce the minimum real build and verification entry point, authored Protocol and SQL, clean generation, SDK HTTP access and Core-owned SQLite opening. Use an isolated real Core process and owned persistent files. Prepare credentials before submission and provision through Core's authenticated private maintenance boundary. A test launcher can supply the local management peer; it never opens SQLite. Exercise real HTTPS trust, without claiming an installed manager or full first-use deployment. Host-managed Start/Stop/Restart arrives in 4 and 5.
 
 The Dataset commit appends complete public changes and any activity records supplied by the owning action atomically. Ordinary registration and telemetry do not become a new activity-log category. Test credential activity where applicable. Include a supported Alias edit using the separate descriptive revision.
 
-Evidence compares independently authored direct-Protocol and SDK scenarios. Cover lost/concurrent registration across Asset restart, invalid initial fields, changed retry facts, two-Asset impersonation rejection, omission/null, Unicode and duplicate-key rejection, original signed spellings, current/obsolete generations and unknown times. Interleave telemetry with Alias edits: an unchanged descriptive base still succeeds, a competing edit conflicts, and no edit overwrites reporting. Kill before/after commit and open retained. This proves retained opening, not the later host lifecycle workflow. Check TLS failures and secret redaction. Exclude Tasks, files, Plugins, Full mode and radio encoding.
+Evidence compares independently authored direct-Protocol and SDK scenarios. Cover lost/concurrent registration across Asset restart, invalid initial fields, changed retry facts, two-Asset impersonation rejection, omission/null, Unicode and duplicate-key rejection, original signed spellings on the direct-IP path, current/obsolete generations and unknown times. Interleave telemetry with Alias edits: an unchanged descriptive base still succeeds, a competing edit conflicts, and no edit overwrites reporting. Kill before/after commit and open retained. This proves retained opening, not the later host lifecycle workflow. Check TLS failures and secret redaction. Exclude Tasks, files, Plugins, Full mode and radio encoding.
 
 ## 2. Execute coordinate Move To
 
-An operator submits queued Move To. The simulated Asset retrieves it, reports progress and reports its outcome. Use the [independent spatial fixture](topics/spatial-data.md#move-to). This initial coordinate workflow has no execution deadline. Core neither infers arrival from telemetry nor schedules execution.
+The operator fixture submits queued Move To through the SDK. The gateway fixture retrieves the assigned Task and submits controlled drone progress and outcome evidence through its SDK instance. Radio delivery and drone execution remain external responsibilities. Use the [independent spatial fixture](topics/spatial-data.md#move-to). This initial coordinate workflow has no execution deadline. Core neither infers arrival from telemetry nor schedules execution.
+
+First publish a minimal detection owned by the drone through its bound gateway and read it through the operator SDK. Preserve observation identity through retries and authorized gateway replacement. Reject unbound relay and cross-publisher overwrite. Withdraw a relay binding and reject that gateway's subsequent observation writes. Verify that Track-only writes do not refresh Asset Contact. This supplies the first Track observation path; full publisher and geometry workflows arrive in 14. Task evidence remains governed separately by the Asset reporting contract.
 
 Add Tasks-owned transitions, creation retry identity, submission sequence, the basic queue aggregate and assigned-work pagination. Task reports pass shared acceptance in the same commit as Task, Entity and public-change effects. Include cancellation request, confirmation and decline, offline issuance/cancellation and ordinary same-process reconnect.
 
 Evidence proves one Task after concurrent/lost-response retries, permitted state-model sequences, delayed outcomes after newer telemetry and both cancellation/outcome orders. Use 5.1 m and 4.9 m fixture progress without making the simulator's arrival threshold a Core rule. Reads do not acknowledge or start work. Retirement/deletion belongs to 7 and uncertain process replacement to 8.
+
+Repeat the Task submission, retrieval, progress, outcome, cancellation and same-process reconnect schedules with a separately authenticated direct-IP Asset SDK client and signed Task reports. Gateway attestation does not substitute for this direct-IP evidence.
 
 Task issuance and cancellation record their attributed activity with the accepted mutation. Matching retries add no second logical action. Verify the actor and retained cancellation history through the activity API.
 
@@ -158,7 +168,7 @@ Switching Open enrollment and replacing credentials each record attributed activ
 
 ## 14. Maintain Tracks and Geofeatures
 
-A publisher creates and corrects observations without changing their age; a different publisher cannot overwrite them. An operator creates/edits a Geofeature using a separate descriptive revision and issued geometry revision.
+Extend the minimal drone-owned observation path from increment 2. A publisher creates and corrects observations without changing their age; a different publisher cannot overwrite them. An operator creates/edits a Geofeature using a separate descriptive revision and issued geometry revision.
 
 Evidence covers sparse quantities, unknown/source times, independent observation groups, identity conflicts, correction history, no duplicate movement and publisher reinstall with fresh local proof and credentials. Preserve attribution, deleted IDs and historical associations. Qualify alias rules, component applicability and spatial/GeoJSON conversion. Extend Full-mode parity and lifecycle coverage. Exclude publisher transfer, automatic expiry, fusion and Plugin-defined components.
 
@@ -194,7 +204,7 @@ Evidence supplies fresh, stale and unknown original observation times through th
 
 ## 20. Qualify the Core-facing gateway contract
 
-A bound gateway constructs reports and reconciles downstream work without replacing Asset authority merely because it restarted. Finalize its enrollment, delegation, generation, evidence-correlation and freshness representations under ADR-0028.
+Extend the gateway fixtures from increments 1 and 2 to the remaining downstream work and recovery cases without replacing Asset authority merely because the gateway restarted. The initial enrollment, delegation, generation, evidence-correlation and freshness representation is established before increment 1 under ADR-0028; complete its later-workflow coverage here.
 
 Evidence rejects unbound relay, obsolete authority and old-Dataset work across reporting paths. Gateway liveness never establishes downstream Contact. Broad operational reads remain distinct from relay authority. Preserve process generations across gateway restart, stable retries and all supported Task/result/control meanings. A faithful integration fixture proves this Core-facing contract, not firmware translation or RF behavior.
 

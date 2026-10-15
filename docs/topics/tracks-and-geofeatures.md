@@ -70,6 +70,8 @@ A Track represents an observed subject. Its geometry is optional; Assets use tel
 
 Each Track has one publisher responsible for its Observed data. Different publishers describing the same subject create separate Tracks. Core does not automatically combine their observations or choose which publisher is correct.
 
+An Asset can own Tracks for subjects it observes. For a drone behind a radio gateway, the drone remains the publisher source and the gateway reports for it under [Asset-owned Track observations](identity-and-access.md#asset-owned-track-observations). Changing the authorized gateway does not transfer the Tracks to that gateway or another publisher.
+
 Entities records the Track's publisher and enforces that boundary on every path that can write its observed fields. Descriptive edits, such as an operator changing an Alias, remain separate and cannot replace publisher-owned observations. Broad operational reads and Plugin Task issuance remain supported, but permission to read another publisher's Track does not grant authorship of its observations; a Plugin cannot overwrite another Track's observed fields merely because it has operational access. This is an ownership rule, not a component extension system or a separate observation service.
 
 Removing a Plugin does not itself delete its published Tracks under the [uninstall contract](plugins.md#uninstall-and-reinstall).
