@@ -1,8 +1,10 @@
 ---
-status: accepted
+status: superseded
 ---
 
 # Use Core time as the installation reference clock
+
+Superseded by [ADR-0029](0029-use-deployment-clocks-and-preserve-event-times.md), accepted on 9 October 2026. The following text preserves the earlier decision and is not a requirement to implement Core-time offset estimation.
 
 Accepted on 28 September 2026. Several accepted rules depend on comparing times recorded by different participants: Track observation age for Commands that need current data under [ADR-0022](0022-one-publisher-per-track.md) and [Track data used by Commands](../topics/tracks-and-geofeatures.md#track-data-used-by-commands), freshness windows for Asset [Contact](../topics/asset-reporting.md#contact-and-freshness), Command validity and execution deadlines under [ADR-0007](0007-reconcile-asset-tasks-after-disconnection.md) and [Command validity](../topics/tasks.md#command-validity-and-deadlines), and the expiry of Resume. An installation operates without internet access under [ADR-0010](0010-operate-without-internet-access.md), so participants cannot be assumed to share a time server, and a clock that drifts by a minute can silently turn fresh data stale or an expired control valid.
 

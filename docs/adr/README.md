@@ -1,6 +1,6 @@
 # Architecture decision records
 
-ADRs record accepted tradeoffs and their rationale. Superseded records stay for history and link to their replacement. See the [documentation guide](../agents/domain.md) for when to add one.
+ADRs record accepted tradeoffs and their rationale. Superseded records stay for history and link to their replacement. See the [documentation guide](../documentation.md) for when to add one and [documentation context](../documentation-context.md) for this experiment's unimplemented starting state.
 
 | ADR | Decision | Status |
 | --- | --- | --- |
@@ -11,7 +11,7 @@ ADRs record accepted tradeoffs and their rationale. Superseded records stay for 
 | [ADR-0005](0005-allow-compatible-client-versions.md) | Allow compatible client versions | Accepted |
 | [ADR-0006](0006-protect-active-plugin-work-during-lifecycle-changes.md) | Protect active Plugin work during lifecycle changes | Accepted |
 | [ADR-0007](0007-reconcile-asset-tasks-after-disconnection.md) | Reconcile Asset Tasks after disconnection | Accepted |
-| [ADR-0008](0008-complete-scan-tasks-when-required-results-are-available.md) | Complete scan Tasks when required results are available | Superseded by ADR-0026 |
+| [ADR-0008](0008-complete-scan-tasks-when-required-results-are-available.md) | Complete scan Tasks when required results are available | Superseded by [ADR-0026](0026-record-asset-completion-independently-of-result-availability.md) |
 | [ADR-0009](0009-expose-objects-only-when-ready.md) | Expose Objects only when ready | Accepted |
 | [ADR-0010](0010-operate-without-internet-access.md) | Operate without internet access | Accepted |
 | [ADR-0011](0011-generate-shared-contracts-with-minimal-customization.md) | Generate shared contracts with minimal customization | Accepted |
@@ -28,7 +28,8 @@ ADRs record accepted tradeoffs and their rationale. Superseded records stay for 
 | [ADR-0022](0022-one-publisher-per-track.md) | Give each Track one publisher for observed data | Accepted |
 | [ADR-0023](0023-protect-required-entity-references-during-tasks.md) | Protect required Entity references during Tasks | Accepted |
 | [ADR-0024](0024-use-live-geofeature-geometry-in-tasks.md) | Use live Geofeature geometry in Tasks | Accepted |
-| [ADR-0025](0025-use-core-time-as-the-installation-reference-clock.md) | Use Core time as the installation reference clock | Accepted |
+| [ADR-0025](0025-use-core-time-as-the-installation-reference-clock.md) | Use Core time as the installation reference clock | Superseded by [ADR-0029](0029-use-deployment-clocks-and-preserve-event-times.md) |
 | [ADR-0026](0026-record-asset-completion-independently-of-result-availability.md) | Record Asset completion independently of result availability | Accepted |
 | [ADR-0027](0027-administer-core-configuration-locally.md) | Administer Core configuration locally | Accepted |
 | [ADR-0028](0028-trust-gateways-to-author-bound-asset-reports.md) | Trust gateways to author reports for bound Assets | Accepted |
+| [ADR-0029](0029-use-deployment-clocks-and-preserve-event-times.md) | Use deployment clocks and preserve event times | Accepted |
