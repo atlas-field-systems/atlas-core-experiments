@@ -63,7 +63,7 @@ Deletion follows [Entity deletion](topics/tracks-and-geofeatures.md#entity-delet
 
 [Asset retirement](topics/identity-and-access.md#asset-retirement) remains possible even when that deletion guard blocks removal; its retry and already-retired distinctions apply to the binding above.
 
-Asset reports follow [Asset reporting](topics/asset-reporting.md): Assets author their Reported data, Core owns Derived data, and only accepted fresh reports refresh Contact. Descriptive edits use the [concurrent-edit protection](architecture/system-design.md#concurrent-descriptive-edits).
+Asset reports follow [Asset reporting](topics/asset-reporting.md): Assets author their Reported data, Core owns Derived data, and only accepted fresh reports refresh Contact. Descriptive edits use `expected_edit_revision` for every Entity subtype under [concurrent-edit protection](architecture/system-design.md#concurrent-descriptive-edits), separately from synchronized resource version.
 
 The SDK provides Asset registration through `POST /entities`, followed by check-in; no separate registration or telemetry endpoint is needed. Registration content, stable Asset IDs and retries follow [Asset registration](topics/identity-and-access.md#asset-registration), and values before the first report follow [initial values](topics/asset-reporting.md#components-and-initial-values). See the [SDK operations catalog](topics/sdk.md#operations-catalog).
 
@@ -193,7 +193,7 @@ Feed authentication follows [connection setup](topics/sdk.md#connection-setup): 
 
 | Method and path | Expected caller / purpose | Input → result | Effects | Basis |
 | --- | --- | --- | --- | --- |
-| `GET /health` | Authenticated clients discover Core state; Assets obtain contact proof | Credentials, optional bound Asset/generation challenge request → liveness, Dataset/Core time/version discovery, finite [snapshot allocation context](topics/sdk.md#snapshot-allocation-retries), advisory Open enrollment status and optional contact challenge | No operational mutation or Contact refresh; challenge is proof for a later accepted report | Adapt: [freshness exchange](topics/asset-reporting.md#contact-proof-and-clock-uncertainty) |
+| `GET /health` | Authenticated clients discover Core state; Assets obtain contact proof | Credentials, optional bound Asset/generation challenge request → liveness, Dataset/Core time/version discovery, finite [snapshot allocation context](topics/sdk.md#snapshot-allocation-retries), advisory Open enrollment status and optional contact challenge | No operational mutation or Contact refresh; challenge is proof for a later accepted report | Adapt: [source-time challenge proof](topics/asset-reporting.md#contact-proof-and-clock-uncertainty) under [ADR-0029](adr/0029-use-deployment-clocks-and-preserve-event-times.md) |
 | `GET /readiness` | Monitors check required dependencies | Caller credentials → readiness status and dependency checks | None | Adapt: now authenticated |
 | `GET /docs` | Developers browse interactive documentation | Caller credentials → documentation interface | None | New |
 | `GET /openapi.json` | SDK/tooling and docs read the HTTP contract | Caller credentials → OpenAPI document | None | New |

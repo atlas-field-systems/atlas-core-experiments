@@ -175,7 +175,9 @@ Serialize management actions for each Plugin and retain their recorded outcome, 
 
 A planned Plugin stop or update stops admitting new Operations, asks continuous ingestion to stop, and waits for finite active Operations to finish or be explicitly cancelled. The continuous ingestion loop stops as part of Plugin shutdown; it is not finite work that must finish naturally. Unrelated Asset Tasks do not block Plugin management. This stopping procedure applies to independent Plugin lifecycle actions while Core stays running.
 
-If the Plugin cannot stop cooperatively, Core reports the problem and permits an explicit operator force stop. A force stop must not be reported as successful Operation completion. Report confirmed outcomes and any uncertainty about interrupted work honestly; a stop request alone is not proof that all effects have stopped.
+If the Plugin cannot stop cooperatively, Core reports the problem and permits an explicit operator force stop. After confirmed Plugin exit, force stop lets the original update, uninstall or settings application finish; a plain stop leaves the Plugin stopped. Unconfirmed exit leaves the action incomplete. A force stop must not be reported as successful Operation completion. Report confirmed outcomes and any uncertainty about interrupted work honestly; a stop request alone is not proof that all effects have stopped.
+
+Inspection, confirmed force stop and whole-installation takeover remain reachable while protected stopping waits, including when stopping is part of update, uninstall or settings application. The [waiting-action controls](dataset-lifecycle.md#controls-during-protected-plugin-drain) run through the existing host manager owner. Whole-installation Stop/Restart/Reset/Hard Reset follows its own lifecycle rather than waiting for the Plugin's finite work to succeed. Unrelated administration can still receive `management_busy`; operational availability does not imply concurrent management actions.
 
 ### Faults
 

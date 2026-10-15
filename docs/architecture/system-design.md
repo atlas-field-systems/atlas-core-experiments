@@ -46,6 +46,8 @@ The management implementation must remain available after Core stops. It owns li
 
 The installation-specific manager survives CLI/TUI exit and unexpected Core loss. It serializes lifecycle work, authenticates private Unix peers and stops Plugins when their Core run ends under [host supervision](../topics/dataset-lifecycle.md#host-supervision-and-private-coordination). Keep the Docker adapter concrete and on the host under [ADR-0017](../adr/0017-deploy-core-and-plugins-as-docker-containers.md#ownership-and-lifecycle).
 
+Serialization does not block inspection or the [confirmed controls of an active Plugin drain](../topics/dataset-lifecycle.md#controls-during-protected-plugin-drain). The existing manager owner records and executes force stop or whole-installation takeover without acquiring a second lifecycle owner. Durable control identity and handoff recovery belong to its existing action-record mechanism; Core retains Plugin policy. Unrelated management remains serialized.
+
 #### Management action records
 
 Use one private action-record representation for recoverable local management work. The shared management module owns the action identity, kind, target, action-specific phase and known outcome, together with the progress needed to resume cleanup. CLI and TUI callers submit an action and inspect its result; they do not maintain separate recovery records or reconstruct cleanup progress. Share recording and recovery mechanics without forcing different actions through one sequence of phases.
